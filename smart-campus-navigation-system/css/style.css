@@ -1,0 +1,15 @@
+.title {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2E86C1;
+}
+
+.button {
+    -fx-background-color: #28B463;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+}
+
+.text-area {
+    -fx-font-size: 14px;
+}
