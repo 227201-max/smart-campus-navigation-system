@@ -475,9 +475,9 @@ We use the **Loop Invariant** technique to prove Dijkstra's Algorithm is correct
 #### Proof by Induction:
 
 **Initialization:**
-- Before the loop starts, the start vertex has distance 0 (which is its shortest distance to itself)
-- All other vertices have distance infinity (no path known yet)
-- The invariant holds.
+- Before the loop starts, the source vertex is assigned the distance of 0 (which is its shortest distance to itself)
+- All other vertices are initialized with a distance of infinity indicating no paths are known yet.
+- The loop invariant holds until the first iteration.
 
 **Maintenance:**
 - Assume the invariant holds for all vertices already extracted from the queue
@@ -519,7 +519,7 @@ Where:
 |-----------|------|-----------|-------|
 | Initialization | O(V) | 1 | O(V) |
 | Extract-min from PQ | O(log V) | At most V times | O(V log V) |
-| Decrease-key in PQ | O(log V) | At most E times | O(E log V) |
+| Insert updated node into PQ | O(log V) | At most E times | O(E log V) |
 | **Total** | | | **O((V + E) log V)** |
 
 > **Note:** With a Fibonacci Heap, the complexity can be improved to O(V log V + E), but for our campus graph (sparse graph where E ~ V), both implementations perform similarly.
@@ -529,33 +529,11 @@ Where:
 | Data Structure | Space |
 |----------------|-------|
 | Adjacency List | O(V + E) |
-| Distance Array (dist[]) | O(V) |
-| Predecessor Array (prev[]) | O(V) |
-| Priority Queue | O(V) |
+| Distance Map (dist[]) | O(V) |
+| Predecessor Map (prev[]) | O(V) |
+| Priority Queue | O(V + E) |
 | **Total** | **O(V + E)** |
 
-### 4.4 Recurrence Relation
-
-Let T(V, E) be the time complexity for a graph with V vertices and E edges.
-
-```
-T(V, E) = T(V-1, E') + O(log V + degree(u) * log V)
-
-Base case: T(0, 0) = O(1)
-```
-
-Where at each step:
-- One vertex u is extracted from the priority queue
-- E' is the remaining edges after removing u's edges
-- O(log V) for extract-min operation
-- O(degree(u) * log V) for relaxing all adjacent edges
-
-**Summing over all vertices:**
-```
-T(V, E) = O(1) + sum over all vertices [O(log V) + O(degree(u) * log V)]
-        = O(V log V) + O(E log V)        [since sum of all degrees = 2E]
-        = O((V + E) log V)
-```
 
 ### 4.5 Asymptotic Analysis Summary
 
