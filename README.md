@@ -483,7 +483,7 @@ We use the **Loop Invariant** technique to prove Dijkstra's Algorithm is correct
 - Assume the invariant holds for all vertices already extracted from the queue
 - When we extract vertex u with minimum distance, we examine all its neighbors
 - For each neighbor v, we check if going through u provides a shorter path
-- If a shorter path is found, we update dist[v] accordingly
+- If a shorter path is found, we update dist[v] accordingly.The updated vertex is then          inserted into the priority queue with its new tentative distance.
 - The priority queue ensures we always process the vertex with the smallest tentative distance first
 
 **Termination:**
