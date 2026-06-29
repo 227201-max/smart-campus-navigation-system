@@ -47,10 +47,18 @@ According to Kurniawan et al. (2023), graph-based navigation systems are effecti
 | DKAP | Dewan Kuliah Alam Pusat (Central Lecture Hall) |
 | KAA | Kompleks Akademik A (Academic Complex) |
 | UPM Main Gate | Main entrance of the campus |
-| Kolej Canselor | Residential college |
 | Guard House KC | Security checkpoint |
-| Engineering | Engineering Faculty |
-| Hostel | Student accommodation |
+| KMR | Kolej Mohamad Rashid |
+| Bistro | Campus bistro/cafeteria area |
+| Canselori | Chancellor Complex |
+| Faculty of Science | Science Faculty |
+| SPE | School of Business and Economics |
+| Library | University library |
+| Dewan Besar | Main hall/event venue |
+| PKSASS | Sports complex area |
+| Dewan Kuliah | Lecture hall building |
+| Foodtech Faculty | Food Technology Faculty |
+| Bilik Kuliah | Additional classroom block |
 
 ### Graph Representation
 
@@ -63,16 +71,48 @@ The campus is modeled as a **weighted undirected graph**:
 
 | From | To | Distance (meters) |
 |------|-----|-------------------|
-| FBMK | KAA | 150 |
+| FBMK | KAA | 180 |
 | FSKTM | DKAP | 80 |
-| FSKTM | Kolej Canselor | 250 |
-| FSKTM | UPM main gate | 60 |
-| UPM main gate | KAA | 300 |
-| UPM main gate | DKAP | 150 |
-| FSKTM | Guard House KC | 80 |
-| Guard House KC | FBMK | 250 |
-| Engineering | Hostel | 500 |
-| Engineering | Main Gate | 600 |
+| FSKTM | Guard House KC | 250 |
+| FSKTM | UPM main gate | 80 |
+| UPM main gate | KAA | 400 |
+| UPM main gate | DKAP | 180 |
+| FSKTM | Guard House KC | 200 |
+| Guard House KC | FBMK | 500 |
+| Guard House KC | KMR | 700 |
+| KMR | Bistro | 160 |
+| Bistro | Canselori | 300 |
+| Canselori | Faculty of Science | 700 |
+| Faculty of Science | SPE | 80 |
+| SPE | Library | 350 |
+| DKAP | Dewan Besar | 400 |
+| Dewan Besar | PKSASS | 50 |
+| Library | Bilik Kuliah | 280 |
+| Dewan Besar | Dewan Kuliah | 850 |
+| Dewan Kuliah | Foodtech Faculty | 100 |
+| Bilik Kuliah | Foodtech Faculty | 600 |
+| Guard House KC | Dewan Besar | 280 |
+| PKSASS | SPE | 280 |
+
+### Bus Stops
+
+| Route | Distance (meters) |
+|-------|-------------------|
+| FSKTM - SPE | 500 |
+| SPE - Library | 350 |
+| FBMK - SPE | 450 |
+| Library - Foodtech Faculty | 200 |
+
+### Campus Facilities
+
+| Location | Available Facilities |
+|----------|---------------------|
+| FSKTM | Printing, Cafe, Meeting Room, Toilets, Vending Machines, Bus Stop |
+| FBMK | Printing Service, Bus Stop |
+| KAA | Cafe, Printing Service, Convenience Store, Toilets, Bus Stop |
+| DKAP | Convenience Store, Toilets, Vending Machines |
+| Bistro | Convenience Store, Cafe, Printing Service, Bus Stop |
+| Library | Printing Service, Convenience Store, Cafe, Toilets |
 
 ---
 
@@ -103,7 +143,7 @@ The campus is modeled as a **weighted undirected graph**:
 ### Pseudocode
 
 ```
-Algorithm Dijkstra(Graph, Start, Destination):
+Algorithm Dijkstra(Graph, Start, Destination, isBus, blockedEdges):
 
     // Step 1: Initialization
     for each vertex v in Graph:
@@ -124,7 +164,7 @@ Algorithm Dijkstra(Graph, Start, Destination):
 
         // Check neighbors - Relaxation Step
         for each neighbor v of u:
-            if edge(u,v) is BLOCKED:
+            if edge(u,v) is in blockedEdges:
                 continue
 
             alt <- dist[u] + weight(u, v)
@@ -156,6 +196,7 @@ Algorithm Dijkstra(Graph, Start, Destination):
 **Phase 2 - Greedy Processing (Recurrence):**
 - While the queue is not empty:
   - Extract the node with the smallest distance
+  - Skip blocked edges (road maintenance)
   - For each neighbor, check if the path through the current node is shorter
   - If a shorter path is found, update the distance and predecessor
 
@@ -185,9 +226,9 @@ The Smart Campus Navigation System operates through three integrated layers:
 
 | Layer | Description |
 |-------|-------------|
-| **Input Layer** | User selects start and destination from dropdown menus; user can also mark roads as closed for maintenance |
+| **Input Layer** | User selects start and destination from dropdown menus; user can also mark roads as closed for maintenance, search for facilities, or choose bus routes |
 | **Processing Layer** | System initializes distances, places nodes into a priority queue, and executes Dijkstra's algorithm to find the shortest path |
-| **Output Layer** | System outputs the shortest route, total distance, and estimated travel time |
+| **Output Layer** | System outputs the shortest route, total distance, estimated travel time, and available facilities |
 
 ### Java Source Code
 
@@ -282,7 +323,15 @@ package com.ccs3402.lab.smartcampusnavigationsystem.graphs;
 import java.util.*;
 
 public class DijkstraAlgorithm {
+
+    // Original 3-parameter method
     public static Route findShortestPath(Graph graph, String start, String end) {
+        return findShortestPath(graph, start, end, false, new HashSet<String>());
+    }
+
+    // Enhanced 5-parameter method with road blocking support
+    public static Route findShortestPath(Graph graph, String start, String end, 
+                                          boolean isBus, Set<String> blockedEdges) {
         Map<String, Integer> dist = new HashMap<>();
         Map<String, String> prev = new HashMap<>();
         PriorityQueue<Node> pq = new PriorityQueue<>();
@@ -300,7 +349,16 @@ public class DijkstraAlgorithm {
             if (currentName.equals(end)) break;
 
             for (Edge edge : graph.getAdjList().get(currentName)) {
-                if (!edge.active) continue; // skip blocked roads
+                
+                // Check if road is blocked
+                String edgeKey1 = currentName + "-" + edge.to;
+                String edgeKey2 = edge.to + "-" + currentName;
+                if (blockedEdges.contains(edgeKey1) || blockedEdges.contains(edgeKey2)) {
+                    continue;
+                }
+                
+                if (!edge.active) continue;
+                
                 int newDist = dist.get(currentName) + edge.weight;
                 if (newDist < dist.get(edge.to)) {
                     dist.put(edge.to, newDist);
@@ -325,86 +383,23 @@ public class DijkstraAlgorithm {
 }
 ```
 
-#### Main.java - JavaFX Application
+#### Facilities.java - Facility Search
 ```java
-package com.ccs3402.lab.smartcampusnavigationsystem.graphs.Application;
+package com.ccs3402.lab.smartcampusnavigationsystem.Service;
 
-import com.ccs3402.lab.smartcampusnavigationsystem.graphs.*;
-import javafx.application.Application;
-import javafx.geometry.Insets;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
+import java.util.*;
 
-public class Main extends Application {
-    private Graph graph = new Graph();
+public class Facilities {
+    private String location;
+    private List<String> services;
 
-    @Override
-    public void start(Stage stage) {
-        buildGraph();
-
-        Label title = new Label("Smart Campus Navigation System");
-        title.getStyleClass().add("title");
-
-        ComboBox<String> startBox = new ComboBox<>();
-        ComboBox<String> endBox = new ComboBox<>();
-        startBox.getItems().addAll(graph.getNodes());
-        endBox.getItems().addAll(graph.getNodes());
-
-        Button findBtn = new Button("Find Shortest Route");
-        TextArea output = new TextArea();
-        output.setEditable(false);
-
-        // Route finding action
-        findBtn.setOnAction(e -> {
-            String start = startBox.getValue();
-            String end = endBox.getValue();
-            Route result = DijkstraAlgorithm.findShortestPath(graph, start, end);
-
-            if (result.getTotalDistance() == Integer.MAX_VALUE) {
-                output.setText("No route available due to road maintenance.");
-                return;
-            }
-
-            StringBuilder sb = new StringBuilder();
-            sb.append("Shortest Route:\n\n");
-            for (int i = 0; i < result.getPath().size(); i++) {
-                sb.append(result.getPath().get(i));
-                if (i < result.getPath().size() - 1) sb.append(" -> ");
-            }
-            sb.append("\n\nTotal Distance: ").append(result.getTotalDistance()).append(" meters");
-            double time = result.getTotalDistance() / 80.0;
-            sb.append("\nEstimated Time: ").append(String.format("%.2f", time)).append(" minutes");
-            output.setText(sb.toString());
-        });
-
-        VBox root = new VBox(10);
-        root.setPadding(new Insets(15));
-        root.getChildren().addAll(title, startBox, endBox, findBtn, output);
-
-        Scene scene = new Scene(root, 500, 600);
-        scene.getStylesheets().add(getClass().getResource("/style.css").toExternalForm());
-        stage.setTitle("Campus Navigation System");
-        stage.setScene(scene);
-        stage.show();
+    public Facilities(String location, List<String> services) {
+        this.location = location;
+        this.services = services;
     }
 
-    private void buildGraph() {
-        graph.addEdge("FBMK", "KAA", 150);
-        graph.addEdge("FSKTM", "DKAP", 80);
-        graph.addEdge("FSKTM", "Kolej Canselor", 250);
-        graph.addEdge("FSKTM", "UPM main gate", 60);
-        graph.addEdge("UPM main gate", "KAA", 300);
-        graph.addEdge("UPM main gate", "DKAP", 150);
-        graph.addEdge("FSKTM", "Guard House KC", 80);
-        graph.addEdge("Guard House KC", "FBMK", 250);
-        graph.addEdge("Engineering", "Hostel", 500);
-        graph.addEdge("Engineering", "Main Gate", 600);
-    }
-
-    public static void main(String[] args) { launch(); }
+    public String getLocation() { return location; }
+    public List<String> getServices() { return services; }
 }
 ```
 
@@ -412,41 +407,59 @@ public class Main extends Application {
 
 ### Program Output Examples
 
-**Example 1: FSKTM -> KAA (Shortest Route)**
+**Example 1: FSKTM -> KAA (Walking Route)**
 ```
 Shortest Route:
 
 FSKTM -> UPM main gate -> KAA
 
-Total Distance: 360 meters
-Estimated Time: 4.50 minutes
+Total Distance: 480 meters
+Estimated Time: 6.86 minutes
 ```
 
-**Example 2: FSKTM -> Kolej Canselor**
+**Example 2: FSKTM -> Library (Bus Route)**
 ```
-Shortest Route:
+Bus Route:
 
-FSKTM -> Kolej Canselor
+FSKTM -> SPE -> Library
 
-Total Distance: 250 meters
-Estimated Time: 3.12 minutes
+Total Distance: 850 meters
+Bus Travel Time: 2.83 minutes
+Bus Speed: 300 meters/minute
 ```
 
-**Example 3: Blocked Road Scenario**
+**Example 3: Find Nearest Cafe from FSKTM**
 ```
-! Road CLOSED for maintenance: UPM main gate <-> KAA
+Nearest Cafe: FSKTM
 
-System automatically recalculates and finds alternative route.
+Route: FSKTM
+Distance: 0 meters
+Time: 0.00 minutes
+```
+
+**Example 4: Blocked Road Scenario**
+```
+! Road CLOSED for maintenance: FSKTM <-> UPM main gate
+
+New Route:
+FSKTM -> DKAP -> UPM main gate -> KAA
+
+Total Distance: 660 meters
+Estimated Time: 9.43 minutes
 ```
 
 ### System Features
 
-- [x] Find shortest path between any two campus locations
+- [x] Find shortest walking path between any two campus locations
+- [x] Find shortest bus route between bus stops
+- [x] Search for facilities (Cafe, Printing, Bus Stop, Convenience Store, etc.)
+- [x] Find nearest facility from current location
 - [x] Display total distance in meters
-- [x] Calculate estimated walking time (assuming 80 meters/minute walking speed)
+- [x] Calculate estimated walking time (70 meters/minute) and bus travel time (300 meters/minute)
 - [x] Block roads for maintenance and find alternative routes dynamically
 - [x] Interactive JavaFX user interface with dropdown selections
 - [x] Real-time route recalculation when roads are blocked
+- [x] Compare walking vs bus routes
 
 ---
 
