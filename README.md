@@ -477,7 +477,7 @@ We use the **Loop Invariant** technique to prove Dijkstra's Algorithm is correct
 **Initialization:**
 - Before the loop starts, the source vertex is assigned the distance of 0 (which is its shortest distance to itself)
 - All other vertices are initialized with a distance of infinity indicating no paths are known yet.
-- The loop invariant holds until the first iteration.
+- The loop invariant holds before the first iteration.
 
 **Maintenance:**
 - Assume the invariant holds for all vertices already extracted from the queue
@@ -504,14 +504,14 @@ Using **Binary Heap (PriorityQueue)** implementation:
 
 | Case | Time Complexity | Explanation |
 |------|----------------|-------------|
-| **Best** | O((V + E) log V) | Destination is reached early, fewer vertices need to be processed |
+| **Best** | O((V + E) log V) | Priority queue operations dominate the running time |
 | **Average** | O((V + E) log V) | Standard case with partial graph traversal |
-| **Worst** | O((V + E) log V) | All vertices and edges must be processed |
+| **Worst** | O((V + E) log V) | In the worst case, all reachable vertices and edges are processed before the destination is found |
 
 Where:
 - **V** = Number of vertices (campus locations)
 - **E** = Number of edges (pathways between locations)
-- **log V** = Time for extract-min and decrease-key operations on the binary heap
+- **log V** = Time for extract-min and priority queue insertion operations on the binary heap
 
 #### Detailed Breakdown:
 
@@ -529,8 +529,8 @@ Where:
 | Data Structure | Space |
 |----------------|-------|
 | Adjacency List | O(V + E) |
-| Distance Map (dist[]) | O(V) |
-| Predecessor Map (prev[]) | O(V) |
+| Distance Map (dist) | O(V) |
+| Predecessor Map (prev) | O(V) |
 | Priority Queue | O(V + E) |
 | **Total** | **O(V + E)** |
 
