@@ -125,8 +125,8 @@ The campus is modeled as a **weighted undirected graph**:
 | Sorting | Efficient for organizing and searching data | Cannot determine optimal routes between locations | Low |
 | Divide & Conquer | Breaks problem into smaller subproblems | Not designed for shortest path problems; cannot handle graph traversal efficiently | Low |
 | Dynamic Programming | Stores and reuses previously computed results; finds shortest paths in general graphs | Requires higher memory; inefficient for large-scale graph navigation | Medium |
-| Greedy | Fast and simple to implement | May not always produce a globally optimal solution; sensitive to path dead ends | Medium |
-| **Graph Algorithms** | **Specifically designed for network and path finding problems; directly models locations and pathways** | **Performance can decrease as graph becomes very large and complex** | **High** |
+| Greedy(Djikstra) | Fast and simple to implement | Efficient and gurantees the shortest path for graphs with non-negative edge weights | High |
+
 
 ### Why Dijkstra's Algorithm?
 
