@@ -442,7 +442,9 @@ The Smart Campus Navigation System operates through three integrated layers:
 
 ### Program Output Examples
 
-**Example 1: FSKTM -> LIBRARY (Walking Route and Bus Route)**
+Example 1: FSKTM -> LIBRARY (Walking Route and Bus Route)
+
+This output shows walking route and bus route together when the user choose starting and destination location. Bus route will be only shown when its available between the 2 locations.
 ```
 🚶 Walking Route:
 
@@ -462,7 +464,9 @@ Estimated Time:
 ⏱ Total time: 7 min 50 sec
 ```
 
-**Example 2: FSKTM -> KAA (Blocked Road Scenario)**
+Example 2: FSKTM -> KAA (Blocked Road Scenario)
+
+If the normal route is blocked, it will show another alternative route to reach desired destination. Bus route will be only shown when it's available at that time.**
 ```
 🚧 Road blocked between Guard House KC and FBMK
 
@@ -477,7 +481,9 @@ Estimated Walking Time: 6 min 51 sec
 ❌ No valid bus route available
 ```
 
-**Example 3: Find Nearest Convenience Store from FSKTM**
+Example 3: Find Nearest Convenience Store from FSKTM
+
+User can choose starting location and desired facility. Then, the system will show the nearby facility with distance and estimated time.**
 ```
 🏫 NEAREST FACILITY
 ====================
