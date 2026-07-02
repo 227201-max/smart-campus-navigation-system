@@ -44,18 +44,18 @@ According to Kurniawan et al. (2023), graph-based navigation systems are effecti
 |----------|-------------|
 | FSKTM | Faculty of Computer Science & IT |
 | FBMK | Faculty of Modern Languages & Communication |
-| DKAP | Dewan Kuliah Alam Pusat (Central Lecture Hall) |
+| DKAP | Dewan Kuliah Akademik Pusat |
 | KAA | Kompleks Akademik A (Academic Complex) |
 | UPM Main Gate | Main entrance of the campus |
 | Guard House KC | Security checkpoint |
-| KMR | Kolej Mohamad Rashid |
+| KMR | OnePutra Residence |
 | Bistro | Campus bistro/cafeteria area |
 | Canselori | Chancellor Complex |
 | Faculty of Science | Science Faculty |
 | SPE | School of Business and Economics |
 | Library | University library |
 | Dewan Besar | Main hall/event venue |
-| PKSASS | Sports complex area |
+| PKSASS | Sultan Salahuddin Abdul Aziz Shah Arts and Cultural Centre |
 | Dewan Kuliah | Lecture hall building |
 | Foodtech Faculty | Food Technology Faculty |
 | Bilik Kuliah | Additional classroom block |
@@ -77,7 +77,6 @@ The campus is modeled as a **weighted undirected graph**:
 | FSKTM | UPM main gate | 80 |
 | UPM main gate | KAA | 400 |
 | UPM main gate | DKAP | 180 |
-| FSKTM | Guard House KC | 200 |
 | Guard House KC | FBMK | 500 |
 | Guard House KC | KMR | 700 |
 | KMR | Bistro | 160 |
@@ -130,7 +129,7 @@ The campus is modeled as a **weighted undirected graph**:
 
 ### Why Dijkstra's Algorithm?
 
-> "Graph algorithms are the most suitable solution because a university campus can be represented as a weighted graph, where buildings are vertices and pathways are edges. Dijkstra's algorithm is selected as the proposed solution because it uses a greedy approach to find the shortest path in a graph with non-negative edge weights." -- Gbadamosi et al. (2025)
+Graph algorithms are the most suitable solution because a university campus can be represented as a weighted graph, where buildings are vertices and pathways are edges. Dijkstra's algorithm is selected as the proposed solution because it uses a greedy approach to find the shortest path in a graph with non-negative edge weights (Gbadamosi et al., 2025).
 
 **Dijkstra's Algorithm was selected because:**
 
@@ -613,13 +612,13 @@ Where:
 
 ## References
 
-1. Gbadamosi, et al. (2025). GIS-based Smart Campus Navigation System at Olusegun Agagu University of Science and Technology (OAUSTECH), Nigeria.
+1. Gbadamosi,O.A., Ilori,A.O., Oduwale,M.A., & Abiona,O.O.(2025). Development  of  a  smart  GIS-based  campus  navigation  and  shortest  path  routing  system  for OAUSTECH, Ondo State, Nigeria. Review of Information Engineering and Applications, 12(1), 48. https://archive.conscientiabeam.com/index.php/79/article/view/4656/8953
 
 2. Kurniawan, et al. (2023). Graph-based navigation systems for optimizing route planning in complex environments.
 
-3. Fernandez, et al. (2025). Navigation challenges at Universidad de Manila (UDM): Outdated maps and campus signage issues.
+3. Fernandez,R., Leynes,M., Almario,M.J., Aputan,C., Iloseo,F.J., & Manalang,J.R. (2025). SMART CAMPUS DIRECTORY: AI-POWERED NAVIGATION SYSTEM DEPLOYMENT FOR UNIVERSIDAD DE MANILA. International Journal of Engineering Technology Research Management, 9(10), 13-14. https://zenodo.org/records/17251000
 
-4. Cormen, T.H., Leiserson, C.E., Rivest, R.L., & Stein, C. (2009). *Introduction to Algorithms* (3rd Edition). MIT Press. Chapter 24: Single-Source Shortest Paths.
+4. Cormen, T.H., Leiserson, C.E., Rivest, R.L., & Stein, C. (2009). Introduction to Algorithms (3rd Edition). MIT Press. Chapter 24: Single-Source Shortest Paths.
 
 ---
 
