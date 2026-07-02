@@ -233,229 +233,273 @@ The Smart Campus Navigation System operates through three integrated layers:
 ### Java Source Code
 
 #### Node.java - Priority Queue Node
-```java
-package com.ccs3402.lab.smartcampusnavigationsystem.graphs;
 
-public class Node implements Comparable<Node> {
-    String name;
-    int dist;
-
+           
+    public class Node implements Comparable<Node> {
+         String name; //stores the name of the location
+         int dist;
+    
     public Node(String name, int dist) {
         this.name = name;
         this.dist = dist;
     }
-
     @Override
     public int compareTo(Node other) {
         return this.dist - other.dist;
     }
-}
-```
-
+    }
 #### Edge.java - Graph Edge
-```java
-package com.ccs3402.lab.smartcampusnavigationsystem.graphs;
 
-public class Edge {
-    String to;
-    int weight;
-    boolean active = true; // road is open by default
+    package com.ccs3402.lab.smartcampusnavigationsystemCCS4402.graphs;
+    public class Edge {
+        String to; //stores the destination location
+        int weight; // stores the distance
+        boolean active = true; // road is open by default
 
-    public Edge(String to, int weight) {
+    public Edge(String to, int weight) { //create a new road
         this.to = to;
         this.weight = weight;
     }
-}
-```
+    }
 
 #### Graph.java - Graph Data Structure
-```java
-package com.ccs3402.lab.smartcampusnavigationsystem.graphs;
 
-import java.util.*;
+    package com.ccs3402.lab.smartcampusnavigationsystemCCS4402.graphs;
+    import java.util.*;
 
-public class Graph {
+    public class Graph {
     private Map<String, List<Edge>> adj = new HashMap<>();
 
     public void addEdge(String from, String to, int weight) {
+
         adj.putIfAbsent(from, new ArrayList<>());
         adj.putIfAbsent(to, new ArrayList<>());
+
         adj.get(from).add(new Edge(to, weight));
         adj.get(to).add(new Edge(from, weight)); // undirected graph
     }
 
     public void blockEdge(String from, String to) {
-        for (Edge e : adj.get(from))
-            if (e.to.equals(to)) e.active = false;
-        for (Edge e : adj.get(to))
-            if (e.to.equals(from)) e.active = false;
+
+        for (Edge e : adj.get(from)) {
+            if (e.to.equals(to)) {
+                e.active = false;
+            }
+        }
+
+        for (Edge e : adj.get(to)) {
+            if (e.to.equals(from)) {
+                e.active = false;
+            }
+        }
     }
 
-    public Map<String, List<Edge>> getAdjList() { return adj; }
-    public Set<String> getNodes() { return adj.keySet(); }
-}
-```
+    public Map<String, List<Edge>> getAdjList() {
+        return adj;
+    }
+
+    public Set<String> getNodes() {
+        return adj.keySet();
+    }
+
+
 
 #### Route.java - Result Container
-```java
-package com.ccs3402.lab.smartcampusnavigationsystem.graphs;
 
-import java.util.List;
+    package com.ccs3402.lab.smartcampusnavigationsystemCCS4402.graphs;
+    import java.util.List;
 
-public class Route {
-    private List<String> path;
-    private int totalDistance;
+    public class Route {
+        private List<String> path; //stores the sequence of locations
+        private int totalDistance;
 
     public Route(List<String> path, int totalDistance) {
         this.path = path;
         this.totalDistance = totalDistance;
     }
 
-    public List<String> getPath() { return path; }
-    public int getTotalDistance() { return totalDistance; }
-}
-```
-
-#### DijkstraAlgorithm.java - Core Algorithm
-```java
-package com.ccs3402.lab.smartcampusnavigationsystem.graphs;
-
-import java.util.*;
-
-public class DijkstraAlgorithm {
-
-    // Original 3-parameter method
-    public static Route findShortestPath(Graph graph, String start, String end) {
-        return findShortestPath(graph, start, end, false, new HashSet<String>());
+    public List<String> getPath() {
+        return path;
     }
 
-    // Enhanced 5-parameter method with road blocking support
-    public static Route findShortestPath(Graph graph, String start, String end, 
-                                          boolean isBus, Set<String> blockedEdges) {
-        Map<String, Integer> dist = new HashMap<>();
-        Map<String, String> prev = new HashMap<>();
-        PriorityQueue<Node> pq = new PriorityQueue<>();
+    public int getTotalDistance() {
+        return totalDistance;
+    }
+    }
 
-        // Step 1: Initialize distances
-        for (String node : graph.getAdjList().keySet())
+#### DijkstraAlgorithm.java - Core Algorithm
+
+    package com.ccs3402.lab.smartcampusnavigationsystemCCS4402.graphs;
+    import java.util.*;
+    
+    public class DijkstraAlgorithm { 
+        public static Route findShortestPath( //returns shortest path and total distance
+              Graph graph,
+              String start,
+              String end,
+              boolean busMode, //calculate walking or bus route
+              Set<String> blockedEdges //roads that are closed
+    ) {
+
+        Map<String, Integer> dist = new HashMap<>(); //stores the shortest distance from the start
+        Map<String, String> prev = new HashMap<>(); // stores where it came from
+        PriorityQueue<Node> pq = new PriorityQueue<>(); // stores locations that are waiting to be explored
+
+        // initialize distances to infinity
+        for (String node : graph.getAdjList().keySet()) {
             dist.put(node, Integer.MAX_VALUE);
-        dist.put(start, 0);
-        pq.add(new Node(start, 0));
+        }
 
-        // Step 2: Dijkstra loop
-        while (!pq.isEmpty()) {
-            Node current = pq.poll();
+        dist.put(start, 0); // starting location has 0
+        pq.add(new Node(start, 0)); //add start node in the queue
+
+        while (!pq.isEmpty()) { // run until there are no more nodes to check
+
+            Node current = pq.poll();   // pick nearest location
             String currentName = current.name;
-            if (currentName.equals(end)) break;
 
-            for (Edge edge : graph.getAdjList().get(currentName)) {
-                
-                // Check if road is blocked
-                String edgeKey1 = currentName + "-" + edge.to;
-                String edgeKey2 = edge.to + "-" + currentName;
-                if (blockedEdges.contains(edgeKey1) || blockedEdges.contains(edgeKey2)) {
+            if (currentName.equals(end)) break; // Reached destination, stop early
+
+            if (!graph.getAdjList().containsKey(currentName)) continue;
+
+            for (Edge edge : graph.getAdjList().get(currentName)) { // check all connected roads
+
+                String next = edge.to; // get next node
+
+                // BLOCK CHECK
+                if (blockedEdges != null &&
+                        (blockedEdges.contains(currentName + "-" + next) ||
+                                blockedEdges.contains(next + "-" + currentName))) {
                     continue;
                 }
-                
-                if (!edge.active) continue;
-                
-                int newDist = dist.get(currentName) + edge.weight;
-                if (newDist < dist.get(edge.to)) {
-                    dist.put(edge.to, newDist);
-                    prev.put(edge.to, currentName);
-                    pq.add(new Node(edge.to, newDist));
+
+                // BUS MODE FILTER
+                if (busMode) {
+                    Set<String> busStops = graph.getNodes(); // OR pass separately if needed
+
+                    if (!busStops.contains(currentName) || !busStops.contains(next)) {
+                        continue;
+                    }
+                }
+
+                int newDist = dist.get(currentName) + edge.weight; //calculate new distance
+
+                if (!dist.containsKey(next) || newDist < dist.get(next)) { // update if short path found
+                    dist.put(next, newDist);
+                    prev.put(next, currentName);
+                    pq.add(new Node(next, newDist)); // add node to queue for further exploration
                 }
             }
         }
 
-        // Step 3: Build path
-        List<String> path = new ArrayList<>();
-        String curr = end;
-        if (!prev.containsKey(end) && !start.equals(end))
+        // build path
+        if (!prev.containsKey(end) && !start.equals(end)) {
             return new Route(new ArrayList<>(), Integer.MAX_VALUE);
-        while (curr != null) {
+        }
+
+        List<String> path = new ArrayList<>(); // reconstruct path
+        String curr = end;
+
+        while (curr != null) { //trace backwards
             path.add(curr);
             curr = prev.get(curr);
         }
-        Collections.reverse(path);
+
+        Collections.reverse(path); //converts backward path into correct order
+
         return new Route(path, dist.get(end));
-    }
-}
-```
+    }}
 
+        
 #### Facilities.java - Facility Search
-```java
-package com.ccs3402.lab.smartcampusnavigationsystem.Service;
 
-import java.util.*;
+    package com.ccs3402.lab.smartcampusnavigationsystemCCS4402.Service;
+    import java.util.ArrayList;
+    import java.util.List;
+    
+    public class Facilities{
+        private String location;
+        private List<String> services = new ArrayList<>();
 
-public class Facilities {
-    private String location;
-    private List<String> services;
-
-    public Facilities(String location, List<String> services) {
+    public Facilities(String location) {
         this.location = location;
-        this.services = services;
     }
 
-    public String getLocation() { return location; }
-    public List<String> getServices() { return services; }
-}
-```
+    public void addService(String service) {
+        services.add(service);
+    }
 
-> **Full source code available in the `src/` directory.**
+    public String getLocation() {
+        return location;
+    }
+
+    public List<String> getServices() {
+        return services;
+    }
+    }
+
+ **Full source code available in the `src/` directory.**
 
 ### Program Output Examples
 
-**Example 1: FSKTM -> KAA (Walking Route)**
+**Example 1: FSKTM -> LIBRARY (Walking Route and Bus Route)**
 ```
-Shortest Route:
+🚶 Walking Route:
 
-FSKTM -> UPM main gate -> KAA
+FSKTM → DKAP → Dewan Besar → PKSASS → SPE → Library
+
+Total Distance: 1160 meters
+Estimated Walking Time: 16 min 34 sec
+
+🚌 BUS ROUTE:
+Route: FSKTM → SPE → Library
+Distance: 850 meters
+Estimated Time:
+🚌 Travel time: 2 min 50 sec
+⏳ Waiting time: 5 min
+🕒 Current Time: 12:05
+🚌 Next Bus Arrival: 12:10
+⏱ Total time: 7 min 50 sec
+```
+
+**Example 2: FSKTM -> KAA (Blocked Road Scenario)**
+```
+🚧 Road blocked between Guard House KC and FBMK
+
+🚶 Walking Route:
+
+FSKTM → UPM main gate → KAA
 
 Total Distance: 480 meters
-Estimated Time: 6.86 minutes
+Estimated Walking Time: 6 min 51 sec
+
+🚌 BUS ROUTE:
+❌ No valid bus route available
 ```
 
-**Example 2: FSKTM -> Library (Bus Route)**
+**Example 3: Find Nearest Convenience Store from FSKTM**
 ```
-Bus Route:
+🏫 NEAREST FACILITY
+====================
 
-FSKTM -> SPE -> Library
+Service: Convenience Store
+Nearest Location: DKAP
 
-Total Distance: 850 meters
-Bus Travel Time: 2.83 minutes
-Bus Speed: 300 meters/minute
-```
+🚶 Route:
+FSKTM → DKAP
 
-**Example 3: Find Nearest Cafe from FSKTM**
-```
-Nearest Cafe: FSKTM
-
-Route: FSKTM
-Distance: 0 meters
-Time: 0.00 minutes
-```
-
-**Example 4: Blocked Road Scenario**
-```
-! Road CLOSED for maintenance: FSKTM <-> UPM main gate
-
-New Route:
-FSKTM -> DKAP -> UPM main gate -> KAA
-
-Total Distance: 660 meters
-Estimated Time: 9.43 minutes
+📏 Distance: 80.0 m
+⏱ Estimated Time: 2 min 39 sec
 ```
 
 ### System Features
 
 - [x] Find shortest walking path between any two campus locations
 - [x] Find shortest bus route between bus stops
-- [x] Search for facilities (Cafe, Printing, Bus Stop, Convenience Store, etc.)
+- [x] Search for facilities (Cafe, Printing Service, Bus Stop, Convenience Store, Vending Machines and Toilets.)
 - [x] Find nearest facility from current location
 - [x] Display total distance in meters
-- [x] Calculate estimated walking time (70 meters/minute) and bus travel time (300 meters/minute)
+- [x] Calculate estimated walking time (30 meters/minute) and bus travel time (300 meters/minute)
 - [x] Block roads for maintenance and find alternative routes dynamically
 - [x] Interactive JavaFX user interface with dropdown selections
 - [x] Real-time route recalculation when roads are blocked
